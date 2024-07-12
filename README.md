@@ -1,2 +1,3 @@
-# anything-as-database
-Proving (to myself) that anything can be turned into a database if you use it wrong enough.
+# Anything as a database
+
+I believe it is clear enough...
