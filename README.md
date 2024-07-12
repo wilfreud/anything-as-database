@@ -13,3 +13,4 @@ Still looking for ideas...
 - [ ] A JSON file
 - [ ] A JPEG image
 - [ ] A binary file
+- [ ] A zip file
