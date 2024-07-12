@@ -10,3 +10,6 @@ Still looking for ideas...
 - [ ] A XML file
 - [ ] A simple text file
 - [ ] An spreadsheet file (a great classic)
+- [ ] A JSON file
+- [ ] A JPEG image
+- [ ] A binary file
