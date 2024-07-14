@@ -14,3 +14,4 @@ Still looking for ideas...
 - [ ] A JPEG image
 - [ ] A binary file
 - [ ] A zip file
+- [ ] Telegram
