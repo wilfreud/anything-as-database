@@ -12,7 +12,6 @@ COLUMNS = {} # Associate each table to its columns
 COLUMNS[TABLES[0]] = USER_COLUMNS
 COLUMNS[TABLES[1]] = CONTACTS_COLUMNS
 
-
 class ContactManager:
     """
     Contacts Manager Class
@@ -46,7 +45,7 @@ class ContactManager:
                 # Set columns
                 for col in getattr(self, table.lower()).iter_cols(min_row=1, max_col=len(COLUMNS[table]), max_row=1):
                     for idx, cell in enumerate(col):
-                        cell.value = COLUMNS[table][idx]
+                        cell.value = cols[idx]
         
         # Save (always)
         self.save()
@@ -54,8 +53,20 @@ class ContactManager:
 
     
     def get_tables(self):
-        table = columnar([self.wb.sheetnames], ["< TABLES >"])
+        table = columnar([self.wb.sheetnames], [" TABLES "])
         print(table)
+
+    def get_columns(self, tablename):
+        print(tablename)
+        if tablename not in self.wb:
+            raise IndexError("Table not found")
+
+        table = getattr(self, tablename.lower())
+        print(table)
+        col = table.iter_cols(min_row=1, max_col=len(COLUMNS[tablename]), max_row=1)
+        print(col)
+        print(columnar([col], ["COLUMNS"]))
+        
     
     def save(self):
         self.wb.save(self.filepath)
@@ -63,3 +74,4 @@ class ContactManager:
 
 manager = ContactManager()
 manager.get_tables();
+# manager.get_columns(TABLES[0])

@@ -1,5 +1,6 @@
 from openpyxl import load_workbook, Workbook
 from os import path
+from columnar import columnar
 
 # Tables definitions
 TABLES = ["USERS", "CONTACTS"]
@@ -7,8 +8,7 @@ TABLES = ["USERS", "CONTACTS"]
 # Table column definitions
 USER_COLUMNS = ["USERNAME", "PASSWORD", "CREATE_AT"]
 CONTACTS_COLUMNS = ["FIRSTNAME", "MIDDLENAME", "LASTNAME", "PHONE", "EMAIL", "COMMENT"]
-
-COLUMNS = {}
+COLUMNS = {} # Associate each table to its columns
 COLUMNS[TABLES[0]] = USER_COLUMNS
 COLUMNS[TABLES[1]] = CONTACTS_COLUMNS
 
@@ -39,7 +39,7 @@ class ContactManager:
         for table in TABLES:
             # Create tables if not existing
             if table not in self.wb:
-                print("Creating column ", table)
+                print("Creating column: ", table)
                 cols = COLUMNS[table]
                 setattr(self, table.lower(), self.wb.create_sheet(table))
                 
@@ -54,7 +54,8 @@ class ContactManager:
 
     
     def get_tables(self):
-        print(self.wb.sheetnames)
+        table = columnar([self.wb.sheetnames], ["< TABLES >"])
+        print(table)
     
     def save(self):
         self.wb.save(self.filepath)
