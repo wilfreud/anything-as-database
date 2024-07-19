@@ -7,7 +7,7 @@ TABLES = ["USERS", "CONTACTS"]
 
 # Table column definitions
 USER_COLUMNS = ["USERNAME", "PASSWORD", "CREATE_AT"]
-CONTACTS_COLUMNS = ["FIRSTNAME", "MIDDLENAME", "LASTNAME", "PHONE", "EMAIL", "COMMENT"]
+CONTACTS_COLUMNS = ["FIRSTNAME", "MIDDLENAME", "LASTNAME", "PHONE", "EMAIL", "COMMENT", "CREATED_AT"]
 COLUMNS = {} # Associate each table to its columns
 COLUMNS[TABLES[0]] = USER_COLUMNS
 COLUMNS[TABLES[1]] = CONTACTS_COLUMNS
@@ -37,16 +37,22 @@ class ContactManager:
             del self.wb[self.wb.active.title]
 
         for table in TABLES:
+            attr_name = table.lower()
             # Create tables if not existing
             if table not in self.wb.sheetnames:
                 print("Creating column: ", table)
                 cols = COLUMNS[table]
-                setattr(self, table.lower(), self.wb.create_sheet(table))
+                setattr(self, attr_name, self.wb.create_sheet(table))
                 
                 # Set columns
-                for col in getattr(self, table.lower()).iter_cols(min_row=1, max_col=len(COLUMNS[table]), max_row=1):
-                    for idx, cell in enumerate(col):
+                cols_number = len(cols)
+                table_sheet = getattr(self, attr_name).iter_cols(min_row=1, max_col=cols_number, max_row=1)
+
+                for idx, col in enumerate(table_sheet):
+                    for cell in col:
                         cell.value = cols[idx]
+            else:
+                setattr(self, attr_name, self.wb[table])
         
         # Save (always)
         self.save()
@@ -66,10 +72,17 @@ class ContactManager:
             raise IndexError("Table not found")
 
         table = getattr(self, tablename.lower())
-        print(table)
+        if table is None:
+            raise KeyError(f"\"{tablename}\" table not found!")
+
         col = table.iter_cols(min_row=1, max_col=len(COLUMNS[tablename]), max_row=1)
-        print(col)
-        print(columnar([col], ["COLUMNS"]))
+        data = []
+        for cell_t in col:
+            for cell in cell_t:
+                print(cell.value)
+            # data.append([cell.value])
+        
+        # print(columnar(data, [tablename]))
         
     
     def save(self):
@@ -77,5 +90,5 @@ class ContactManager:
 
 
 manager = ContactManager()
-manager.get_tables();
-# manager.get_columns(TABLES[0])
+# manager.get_tables();
+manager.get_columns(TABLES[0])

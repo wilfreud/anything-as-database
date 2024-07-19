@@ -12,7 +12,6 @@ COLUMNS = {} # Associate each table to its columns
 COLUMNS[TABLES[0]] = USER_COLUMNS
 COLUMNS[TABLES[1]] = CONTACTS_COLUMNS
 
-
 class ContactManager:
     """
     Contacts Manager Class
@@ -22,10 +21,10 @@ class ContactManager:
 
     def __init__(self, filepath=None):
         # Set filepath
-        is_new = filepath is None or filepath == "" or not filepath.endswith("xlsx")
-        self.filepath = "db.xlsx" if is_new else filepath
-        is_new = not path.isfile(self.filepath)
-        self.wb = load_workbook(self.filepath) if not is_new else Workbook()
+        self.is_new = filepath is None or filepath == "" or not filepath.endswith("xlsx")
+        self.filepath = "db.xlsx" if self.is_new else filepath
+        self.is_new = not path.isfile(self.filepath)
+        self.wb = load_workbook(self.filepath) if not self.is_new else Workbook()
         self.users = None
         self.contacts = None
 
@@ -34,19 +33,23 @@ class ContactManager:
 
     def init_tables(self):
         # Remove default sheet
-        del self.wb[self.wb.active.title]
+        if self.is_new:
+            del self.wb[self.wb.active.title]
 
         for table in TABLES:
+            attr_name = table.lower()
             # Create tables if not existing
-            if table not in self.wb:
+            if table not in self.wb.sheetnames:
                 print("Creating column: ", table)
                 cols = COLUMNS[table]
-                setattr(self, table.lower(), self.wb.create_sheet(table))
+                setattr(self, attr_name, self.wb.create_sheet(table))
                 
                 # Set columns
                 for col in getattr(self, table.lower()).iter_cols(min_row=1, max_col=len(COLUMNS[table]), max_row=1):
                     for idx, cell in enumerate(col):
-                        cell.value = COLUMNS[table][idx]
+                        cell.value = cols[idx]
+            else:
+                setattr(self, attr_name, self.wb[table])
         
         # Save (always)
         self.save()
@@ -54,12 +57,34 @@ class ContactManager:
 
     
     def get_tables(self):
-        table = columnar([self.wb.sheetnames], ["< TABLES >"])
+        data = []
+        for name in self.wb.sheetnames:
+            data.append([name])
+        
+        table = columnar(data, [" TABLES "])
         print(table)
+
+    def get_columns(self, tablename):
+        if tablename not in self.wb.sheetnames:
+            raise IndexError("Table not found")
+
+        table = getattr(self, tablename.lower())
+        if table is None:
+            raise KeyError(f"\"{tablename}\" table not found!")
+
+        col = table.iter_cols(min_row=1, max_col=len(COLUMNS[tablename]), max_row=1)
+        data = []
+        for cell in col:
+            print(cell)
+            # data.append([cell.value])
+        
+        print(columnar(data, [tablename]))
+        
     
     def save(self):
         self.wb.save(self.filepath)
 
 
 manager = ContactManager()
-manager.get_tables();
+# manager.get_tables();
+manager.get_columns(TABLES[0])
