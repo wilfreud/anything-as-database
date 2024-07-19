@@ -21,10 +21,10 @@ class ContactManager:
 
     def __init__(self, filepath=None):
         # Set filepath
-        is_new = filepath is None or filepath == "" or not filepath.endswith("xlsx")
-        self.filepath = "db.xlsx" if is_new else filepath
-        is_new = not path.isfile(self.filepath)
-        self.wb = load_workbook(self.filepath) if not is_new else Workbook()
+        self.is_new = filepath is None or filepath == "" or not filepath.endswith("xlsx")
+        self.filepath = "db.xlsx" if self.is_new else filepath
+        self.is_new = not path.isfile(self.filepath)
+        self.wb = load_workbook(self.filepath) if not self.is_new else Workbook()
         self.users = None
         self.contacts = None
 
@@ -33,11 +33,12 @@ class ContactManager:
 
     def init_tables(self):
         # Remove default sheet
-        del self.wb[self.wb.active.title]
+        if self.is_new:
+            del self.wb[self.wb.active.title]
 
         for table in TABLES:
             # Create tables if not existing
-            if table not in self.wb:
+            if table not in self.wb.sheetnames:
                 print("Creating column: ", table)
                 cols = COLUMNS[table]
                 setattr(self, table.lower(), self.wb.create_sheet(table))
@@ -53,12 +54,15 @@ class ContactManager:
 
     
     def get_tables(self):
-        table = columnar([self.wb.sheetnames], [" TABLES "])
+        data = []
+        for name in self.wb.sheetnames:
+            data.append([name])
+        
+        table = columnar(data, [" TABLES "])
         print(table)
 
     def get_columns(self, tablename):
-        print(tablename)
-        if tablename not in self.wb:
+        if tablename not in self.wb.sheetnames:
             raise IndexError("Table not found")
 
         table = getattr(self, tablename.lower())
